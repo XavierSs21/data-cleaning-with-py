@@ -42,4 +42,26 @@ def has_adjacent_repitition(pan):
         >>> has_adjacent_repitition("AABCD1234F")
         True
     """
-    return any((pan[i] == pan[i+1] for i in range(len(pan)- 1)))
+    return any((pan[i] == pan[i+1] for i in range(len(pan) - 1)))
+
+def is_sequencial(pan):
+    """Check if all characters in a PAN number are sequential.
+    
+    Verifies whether consecutive characters follow a sequential pattern in 
+    ASCII order (e.g., 'ABC', '123', 'XYZ').
+    
+    Args:
+        pan (str): The PAN number string to validate.
+    
+    Returns:
+        bool: True if all characters are in sequential order, False otherwise.
+    
+    Example:
+        >>> is_sequential("ABC")
+        True
+        >>> is_sequential("XYZ123")
+        False
+        >>> is_sequential("ABCDE1234F")
+        False
+    """
+    return all(ord(pan[i + 1]) - ord(pan[i]) == 1 for i in range(len(pan) - 1))
