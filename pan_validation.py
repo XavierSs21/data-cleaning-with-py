@@ -5,7 +5,8 @@ df = pd.read_excel('PAN Number Validation Dataset.xlsx')
 
 # Check if it was correctly read
 # print(df.head(10))
-print('Total records = ', len(df))
+# print('Total records = ', len(df))
+total_records = len(df)
 
 # DATA CLEANING
 
@@ -19,14 +20,14 @@ df["Pan_Numbers"] = df["Pan_Numbers"].astype('string').str.strip().str.upper()
 
 # Replace empty strings with NA values and drop rows with missing PAN numbers
 df = df.replace({"Pan_Numbers": ''}, pd.NA).dropna(subset='Pan_Numbers')
-print('Total records = ', len(df))
+# print('Total records = ', len(df))
 
 # Count unique values
-print('Unique values = ', df["Pan_Numbers"].nunique())
+# print('Unique values = ', df["Pan_Numbers"].nunique())
 
 # Remove duplicate values but keep the first occurence
 df = df.drop_duplicates(subset='Pan_Numbers', keep='first')
-print('Total records = ', len(df))
+# print('Total records = ', len(df))
 
 # VALIDATION
 
@@ -103,3 +104,26 @@ def is_valid_pan(pan):
         return False
     
     return True
+
+# Add status column to DataFrame based on PAN validarion rules 
+df["Status"] = df["Pan_Numbers"].apply(lambda x: "Valid" if is_valid_pan(x) else "Invalid")
+# print(df.head(10))
+
+# Calculate validation statistics
+valid_pan_numbers = (df['Status'] == 'Valid').sum()
+invalid_pan_numbers = (df['Status'] == 'Invalid').sum()
+missing_pan_numbers = total_records - (valid_pan_numbers + invalid_pan_numbers)
+
+# Create summary DataFrame with validation counts
+df_summary = pd.DataFrame({"Total Processed Records": [total_records],
+                           "Total Valid Count": [valid_pan_numbers],
+                           "Total Invalid Count": [invalid_pan_numbers],
+                           "Total Missing Count": [missing_pan_numbers]})
+# Filter valid records
+df_valid = df[df['Status'] == 'Valid']
+
+# Export the results to Excel with separate sheets for data and summary
+with pd.ExcelWriter("PAN Number Validated.xlsx") as writer:
+    df_valid.to_excel(writer, sheet_name="Valid PAN Numbers", index=False)
+    df.to_excel(writer, sheet_name="PAN Validations", index=False)
+    df_summary.to_excel(writer, sheet_name="Summary PAN Validations", index=False)
