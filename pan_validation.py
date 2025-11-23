@@ -1,4 +1,5 @@
 import pandas as pd
+import re
 
 df = pd.read_excel('PAN Number Validation Dataset.xlsx')
 
@@ -44,7 +45,7 @@ def has_adjacent_repitition(pan):
     """
     return any((pan[i] == pan[i+1] for i in range(len(pan) - 1)))
 
-def is_sequencial(pan):
+def is_sequential(pan):
     """Check if all characters in a PAN number are sequential.
     
     Verifies whether consecutive characters follow a sequential pattern in 
@@ -65,3 +66,40 @@ def is_sequencial(pan):
         False
     """
     return all(ord(pan[i + 1]) - ord(pan[i]) == 1 for i in range(len(pan) - 1))
+
+def is_valid_pan(pan):
+    """Validate if a PAN number meets all required criteria.
+    
+    A valid PAN number must satisfy the following conditions:
+    - Exactly 10 characters long
+    - Format: 5 letters + 4 digits + 1 letter (e.g., ABCDE1234F)
+    - No adjacent repeated characters
+    - No sequential characters
+    
+    Args:
+        pan (str): The PAN number string to validate.
+    
+    Returns:
+        bool: True if the PAN number is valid, False otherwise.
+    
+    Example:
+        >>> is_valid_pan("ABCDE1234F")
+        True
+        >>> is_valid_pan("AABCD1234F")
+        False
+        >>> is_valid_pan("ABC1234567")
+        False
+    """
+    if len(pan) != 10:
+        return False
+    
+    if not re.match(r'^[A-Z]{5}[0-9]{4}[A-Z]$', pan):
+        return False
+    
+    if has_adjacent_repitition(pan):
+        return False
+    
+    if is_sequential(pan):
+        return False
+    
+    return True
